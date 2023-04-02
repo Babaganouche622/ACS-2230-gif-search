@@ -1,34 +1,38 @@
+// Require Libraries
 const express = require('express');
+const fetch = require('node-fetch');
+
+// App Setup
 const app = express();
-const handlebars = require('express-handlebars');
 
 // Middleware
 // Allow Express (our web framework) to render HTML templates and send them back to the client using a new function
-const hbs = handlebars.create({
-  // Specify helpers which are only registered on this instance.
-  helpers: {
-      foo() { return 'FOO!'; },
-      bar() { return 'BAR!'; }
-  }
-});
+const { engine } = require('express-handlebars');
 
-app.engine('handlebars', hbs.engine);
+// Import .env variables
+require('dotenv').config();
+
+app.engine('handlebars', engine());
 app.set('view engine', 'handlebars');
 app.set('views', './views');
 
+app.use(express.static('public'));
 // Routes
 app.get('/', (req, res) => {
-  console.log(req.query);
-  res.render('home')
-});
-
-app.get('/greetings/:name', (req, res) => {
-  // grab the name from the path provided
-  const name = req.params.name;
-  // render the greetings view, passing along the name
-  res.render('greetings', { name });
-});
-
+  // Handle the home page when we haven't queried yet
+  let term = ""
+  if (req.query.term) {
+    term = req.query.term
+  }
+  fetch(`https://g.tenor.com/v1/search?q=${term}&key=${process.env.API_KEY}&limit=10`)
+    .then(response => response.json())
+    .then(
+      (data) => {
+        const gifs = data.results;
+        res.render('home', { gifs });
+      }
+    );
+})
 
 // Server
 app.listen(3000, () => {
