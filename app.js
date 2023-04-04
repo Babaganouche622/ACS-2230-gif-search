@@ -24,7 +24,7 @@ app.get('/', (req, res) => {
   if (req.query.term) {
     term = req.query.term
   }
-  fetch(`https://g.tenor.com/v1/search?q=${term}&key=${process.env.API_KEY}&limit=10`)
+  fetch(`https://g.tenor.com/v2/search?q=${term}&key=${process.env.API_KEY}&limit=10`)
     .then(response => response.json())
     .then(
       (data) => {
